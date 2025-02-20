@@ -13,6 +13,6 @@
 
 [dev]
   command = "npm start"
-  port = 3000
+  targetPort = 3001
   publish = "build"
   framework = "#custom"

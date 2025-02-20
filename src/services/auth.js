@@ -1,18 +1,18 @@
-import { config } from '../config';
+import { config } from "../config";
 
 export const authService = {
   async signUp(email, password) {
-    const response = await fetch(`${config.API_URL}/auth/signup`, {
-      method: 'POST',
+    const response = await fetch(`${config.NETLIFY_FUNC_URL}/signup`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to sign up');
+      throw new Error(error.error || "Failed to sign up");
     }
 
     return response.json();
@@ -20,16 +20,16 @@ export const authService = {
 
   async signIn(email, password) {
     const response = await fetch(`${config.API_URL}/auth/signin`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to sign in');
+      throw new Error(error.error || "Failed to sign in");
     }
 
     return response.json();
@@ -37,15 +37,15 @@ export const authService = {
 
   async signOut() {
     const response = await fetch(`${config.API_URL}/auth/signout`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to sign out');
+      throw new Error(error.error || "Failed to sign out");
     }
 
     return response.json();
@@ -54,15 +54,15 @@ export const authService = {
   async getSession() {
     const response = await fetch(`${config.API_URL}/auth/session`, {
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Failed to get session');
+      throw new Error(error.error || "Failed to get session");
     }
 
     return response.json();
-  }
+  },
 };

@@ -1,3 +1,4 @@
 export const config = {
-  API_URL: 'http://localhost:3002'
+  API_URL: '/.netlify/functions',
+  NETLIFY_FUNC_URL: 'http://localhost:8888/.netlify/functions'
 };

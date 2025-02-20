@@ -136,36 +136,36 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ThemedApp>
           <div className="App">
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Dashboard</Link>
-            </li>
-            <li>
-              <Link to="/criteria">Criteria Definition</Link>
-            </li>
-            <li>
-              <Link to="/evaluation">Alternative Evaluation</Link>
-            </li>
-            {session && (
-              <li>
-                <button onClick={handleSignOut}>Sign Out</button>
-              </li>
-            )}
-          </ul>
-        </nav>
+            <nav>
+              <ul>
+                <li>
+                  <Link to="/">Dashboard</Link>
+                </li>
+                <li>
+                  <Link to="/criteria">Criteria Definition</Link>
+                </li>
+                <li>
+                  <Link to="/evaluation">Alternative Evaluation</Link>
+                </li>
+                {session && (
+                  <li>
+                    <button onClick={handleSignOut}>Sign Out</button>
+                  </li>
+                )}
+              </ul>
+            </nav>
 
-        <Routes>
-          <Route path="/" element={session ? <Dashboard /> : <Auth />} />
-          <Route path="/projects/:id" element={<ProjectView />} />
-          <Route path="/projects/:id/criteria" element={<CriteriaDefinition />} />
-          <Route path="/projects/:id/form" element={<FormBuilder />} />
-          <Route path="/projects/:id/evaluate" element={<AlternativeEvaluation />} />
-          </Routes>
-          <ThemeSelector />
+            <Routes>
+              <Route path="/" element={session ? <Dashboard /> : <Auth />} />
+              <Route path="/projects/:id" element={<ProjectView />} />
+              <Route path="/projects/:id/criteria" element={<CriteriaDefinition />} />
+              <Route path="/projects/:id/form" element={<FormBuilder />} />
+              <Route path="/projects/:id/evaluate" element={<AlternativeEvaluation />} />
+            </Routes>
+            <ThemeSelector />
           </div>
         </ThemedApp>
       </Router>
