@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import './App.css';
 import Dashboard from './components/Dashboard';
 import ProjectView from './components/ProjectView';
@@ -9,6 +9,7 @@ import AlternativeEvaluation from './components/AlternativeEvaluation';
 import ThemeSelector from './components/ThemeSelector';
 import { ThemeProvider, useTheme } from './themes/ThemeContext';
 import { authService } from './services/auth';
+import Auth from './components/Auth'; // Import the Auth component
 
 // Wrapper component to apply theme styles
 function ThemedApp({ children }) {
@@ -26,7 +27,7 @@ function ThemedApp({ children }) {
     document.documentElement.style.setProperty('--font-primary', theme.fonts.primary);
     document.documentElement.style.setProperty('--font-secondary', theme.fonts.secondary);
     document.documentElement.style.setProperty('--border-radius', theme.borderRadius);
-    
+
     // Apply theme-specific background
     if (theme.backgroundImage) {
       document.body.style.backgroundImage = theme.backgroundImage;
@@ -34,7 +35,7 @@ function ThemedApp({ children }) {
     } else {
       document.body.style.backgroundImage = 'none';
     }
-    
+
     document.body.style.backgroundColor = theme.colors.background;
     document.body.style.color = theme.colors.text;
     document.body.style.fontFamily = theme.fonts.primary;
@@ -43,72 +44,12 @@ function ThemedApp({ children }) {
   return children;
 }
 
-function Auth() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const { message } = await authService.signUp(email, password);
-      alert(message);
-      navigate('/');
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignIn = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await authService.signIn(email, password);
-      navigate('/');
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div>
-      <h2>Sign Up / Sign In</h2>
-      <form onSubmit={handleSignUp}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={loading}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={loading}
-        />
-        <button type="submit" disabled={loading}>
-          Sign Up
-        </button>
-        <button onClick={handleSignIn} disabled={loading}>
-          Sign In
-        </button>
-      </form>
-    </div>
-  );
-}
-
 function App() {
   const [session, setSession] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    
     const checkSession = async () => {
       try {
         const { session } = await authService.getSession();
@@ -119,11 +60,26 @@ function App() {
       }
     };
 
-    checkSession();
+    checkSession(); // Initial session check
     // Poll for session changes every minute
     const interval = setInterval(checkSession, 60000);
+
+    // Navigate to '/' when session becomes null (sign out)
+    if (session === null) {
+      navigate('/');
+    }
+
     return () => clearInterval(interval);
-  }, []);
+  }, [session, navigate]);
+
+  const handleSignIn = async () => {
+    try {
+      const { session: newSession } = await authService.getSession();
+      setSession(newSession);
+    } catch (error) {
+      console.error('Sign in failed:', error);
+    }
+  }
 
   const handleSignOut = async () => {
     try {
@@ -136,7 +92,6 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ThemedApp>
           <div className="App">
             <nav>
@@ -159,7 +114,7 @@ function App() {
             </nav>
 
             <Routes>
-              <Route path="/" element={session ? <Dashboard /> : <Auth />} />
+              <Route path="/" element={session ? <Dashboard /> : <Auth onSignIn={handleSignIn} />} />
               <Route path="/projects/:id" element={<ProjectView />} />
               <Route path="/projects/:id/criteria" element={<CriteriaDefinition />} />
               <Route path="/projects/:id/form" element={<FormBuilder />} />
@@ -168,7 +123,6 @@ function App() {
             <ThemeSelector />
           </div>
         </ThemedApp>
-      </Router>
     </ThemeProvider>
   );
 }

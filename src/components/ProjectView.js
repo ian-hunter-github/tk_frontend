@@ -14,7 +14,7 @@ function ProjectView() {
     const fetchProject = async () => {
       try {
         const { session } = await authService.getSession();
-        const response = await fetch(`${config.API_URL}/projects/${id}`, {
+        const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json'

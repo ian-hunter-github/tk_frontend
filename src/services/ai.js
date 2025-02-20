@@ -4,8 +4,11 @@ import { authService } from './auth';
 export const aiService = {
   async generateCriteria(concept) {
     try {
+      if (config.DEBUG) {
+        console.log("[aiService] generateCriteria called with:", concept);
+      }
       const { session } = await authService.getSession();
-      const response = await fetch(`${config.API_URL}/ai/generate-criteria`, {
+      const response = await fetch(`${config.NETLIFY_FUNC_URL}/ai/generate-criteria`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -19,7 +22,11 @@ export const aiService = {
         throw new Error(error.error || 'Failed to generate criteria');
       }
 
-      return response.json();
+      const result = await response.json();
+      if (config.DEBUG) {
+        console.log("[aiService] generateCriteria result:", result);
+      }
+      return result;
     } catch (error) {
       console.error('Generate Criteria Error:', error);
       throw error;
@@ -28,8 +35,11 @@ export const aiService = {
 
   async evaluateAlternative(alternative, criteria) {
     try {
+      if (config.DEBUG) {
+        console.log("[aiService] evaluateAlternative called with:", alternative, criteria);
+      }
       const { session } = await authService.getSession();
-      const response = await fetch(`${config.API_URL}/ai/evaluate-alternative`, {
+      const response = await fetch(`${config.NETLIFY_FUNC_URL}/ai/evaluate-alternative`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -43,7 +53,11 @@ export const aiService = {
         throw new Error(error.error || 'Failed to evaluate alternative');
       }
 
-      return response.json();
+      const result = await response.json();
+      if (config.DEBUG) {
+        console.log("[aiService] evaluateAlternative result:", result);
+      }
+      return result;
     } catch (error) {
       console.error('Evaluate Alternative Error:', error);
       throw error;
@@ -52,8 +66,11 @@ export const aiService = {
 
   async predictScores(alternative, newCriteria, existingCriteria) {
     try {
+      if (config.DEBUG) {
+        console.log("[aiService] predictScores called with:", alternative, newCriteria, existingCriteria);
+      }
       const { session } = await authService.getSession();
-      const response = await fetch(`${config.API_URL}/ai/predict-scores`, {
+      const response = await fetch(`${config.NETLIFY_FUNC_URL}/ai/predict-scores`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -66,8 +83,12 @@ export const aiService = {
         const error = await response.json();
         throw new Error(error.error || 'Failed to predict scores');
       }
-
-      return response.json();
+      
+      const result = await response.json();
+      if (config.DEBUG) {
+        console.log("[aiService] predictScores result:", result);
+      }
+      return result;
     } catch (error) {
       console.error('Predict Scores Error:', error);
       throw error;

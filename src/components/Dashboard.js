@@ -19,7 +19,7 @@ function Dashboard() {
       setLoading(true);
       try {
         const { session } = await authService.getSession();
-        const response = await fetch(`${config.API_URL}/projects`, {
+        const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json'
@@ -108,7 +108,7 @@ function Dashboard() {
     setLoading(true);
     try {
       const { session } = await authService.getSession();
-      const response = await fetch(`${config.API_URL}/projects`, {
+      const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,

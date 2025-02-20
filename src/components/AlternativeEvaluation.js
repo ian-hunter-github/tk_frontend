@@ -16,7 +16,7 @@ function AlternativeEvaluation() {
     const fetchProjectData = async () => {
       try {
         const { session } = await authService.getSession();
-        const response = await fetch(`${config.API_URL}/projects/${id}`, {
+        const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json'
@@ -31,7 +31,7 @@ function AlternativeEvaluation() {
         setProject(data);
 
         // Fetch existing alternatives
-        const altResponse = await fetch(`${config.API_URL}/projects/${id}/results`, {
+        const altResponse = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}/results`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json'
@@ -135,7 +135,7 @@ function AlternativeEvaluation() {
 
       // Submit alternative with AI evaluation
       const { session } = await authService.getSession();
-      const response = await fetch(`${config.API_URL}/projects/${id}/evaluate`, {
+      const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}/evaluate`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,

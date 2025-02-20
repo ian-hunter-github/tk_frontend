@@ -48,7 +48,7 @@ function CriteriaDefinition() {
     const fetchProject = async () => {
       try {
         const { session } = await authService.getSession();
-        const response = await fetch(`${config.API_URL}/projects/${id}`, {
+        const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
             'Content-Type': 'application/json'
@@ -110,7 +110,7 @@ function CriteriaDefinition() {
       const validWant = wantCriteria.filter(c => c.name.trim());
 
       const { session } = await authService.getSession();
-      const response = await fetch(`${config.API_URL}/projects/${id}/criteria`, {
+      const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}/criteria`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,

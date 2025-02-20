@@ -135,7 +135,7 @@ function FormBuilder() {
 
       const schema = generateSchema();
       const { session } = await authService.getSession();
-      const response = await fetch(`${config.API_URL}/projects/${id}/form-schema`, {
+      const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}/form-schema`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
