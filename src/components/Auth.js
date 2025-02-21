@@ -2,23 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/auth';
 
-function getSessionToken() {
-    const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-      const [key, ...valueParts] = cookie.split("="); // Handles '=' in JWT
-      acc[key] = valueParts.join("="); 
-      return acc;
-    }, {});
-  
-    const projectRef = "bqumdvfrgjcwcnbdbrps"; // Replace with actual project ref
-    const sessionCookieName = `sb-${projectRef}-auth-token`;
-  
-    return cookies[sessionCookieName] || null;
-  }
-  
-
 function Auth({ onSignIn }) {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('ian@tests.com');
+    const [password, setPassword] = useState('test123');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -37,17 +23,17 @@ function Auth({ onSignIn }) {
     };
 
     const handleLocalSignIn = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            await authService.signIn(email, password);
-            onSignIn(); // Call the onSignIn callback from props
-        } catch (error) {
-            alert(error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await authService.signIn(email, password);
+      onSignIn(); // Call the onSignIn callback from props
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
     return (
         <div>

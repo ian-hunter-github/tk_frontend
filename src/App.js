@@ -49,14 +49,24 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    
     const checkSession = async () => {
       try {
         const { session } = await authService.getSession();
         setSession(session);
       } catch (error) {
-        console.error('Session check failed:', error);
-        setSession(null);
+        if (
+          typeof error === 'object' &&
+          error !== null &&
+          'message' in error &&
+          (error.message === 'No session token found' ||
+            error.message === 'Invalid session token')
+        ) {
+          // Expected errors when not logged in - do not log
+          setSession(null);
+          navigate('/'); // Navigate after setting session to null
+        } else {
+          console.error('Session check failed:', error); // Log unexpected errors
+        }
       }
     };
 
@@ -64,22 +74,18 @@ function App() {
     // Poll for session changes every minute
     const interval = setInterval(checkSession, 60000);
 
-    // Navigate to '/' when session becomes null (sign out)
-    if (session === null) {
-      navigate('/');
-    }
-
     return () => clearInterval(interval);
-  }, [session, navigate]);
+  }, [navigate]); // Remove 'session' from the dependency array
 
   const handleSignIn = async () => {
     try {
-      const { session: newSession } = await authService.getSession();
-      setSession(newSession);
+      // Use setSession directly with the result of getSession
+      const { session } = await authService.getSession();
+      setSession(session);
     } catch (error) {
       console.error('Sign in failed:', error);
     }
-  }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -92,37 +98,46 @@ function App() {
 
   return (
     <ThemeProvider>
-        <ThemedApp>
-          <div className="App">
-            <nav>
-              <ul>
+      <ThemedApp>
+        <div className="App">
+          <nav>
+            <ul>
+              <li>
+                <Link to="/">Dashboard</Link>
+              </li>
+              <li>
+                <Link to="/criteria">Criteria Definition</Link>
+              </li>
+              <li>
+                <Link to="/evaluation">Alternative Evaluation</Link>
+              </li>
+              {session && (
                 <li>
-                  <Link to="/">Dashboard</Link>
+                  <button onClick={handleSignOut}>Sign Out</button>
                 </li>
-                <li>
-                  <Link to="/criteria">Criteria Definition</Link>
-                </li>
-                <li>
-                  <Link to="/evaluation">Alternative Evaluation</Link>
-                </li>
-                {session && (
-                  <li>
-                    <button onClick={handleSignOut}>Sign Out</button>
-                  </li>
-                )}
-              </ul>
-            </nav>
+              )}
+            </ul>
+          </nav>
 
-            <Routes>
-              <Route path="/" element={session ? <Dashboard /> : <Auth onSignIn={handleSignIn} />} />
-              <Route path="/projects/:id" element={<ProjectView />} />
-              <Route path="/projects/:id/criteria" element={<CriteriaDefinition />} />
-              <Route path="/projects/:id/form" element={<FormBuilder />} />
-              <Route path="/projects/:id/evaluate" element={<AlternativeEvaluation />} />
-            </Routes>
-            <ThemeSelector />
-          </div>
-        </ThemedApp>
+          <Routes>
+            <Route
+              path="/"
+              element={session ? <Dashboard /> : <Auth onSignIn={handleSignIn} />}
+            />
+            <Route path="/projects/:id" element={<ProjectView />} />
+            <Route
+              path="/projects/:id/criteria"
+              element={<CriteriaDefinition />}
+            />
+            <Route path="/projects/:id/form" element={<FormBuilder />} />
+            <Route
+              path="/projects/:id/evaluate"
+              element={<AlternativeEvaluation />}
+            />
+          </Routes>
+          <ThemeSelector />
+        </div>
+      </ThemedApp>
     </ThemeProvider>
   );
 }

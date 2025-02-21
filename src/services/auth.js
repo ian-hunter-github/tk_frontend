@@ -1,20 +1,21 @@
 import { config } from "../config";
 
+
 // Helper function to get the session token from cookies
 function getTokenFromCookie() {
-    const cookieString = document.cookie || '';
-    const cookies = cookieString.split(';').reduce((acc, cookie) => {
-        const [key, value] = cookie.trim().split('=');
-        acc[key] = value;
-        return acc;
-    }, {});
+  const cookieString = document.cookie || "";
+  const cookies = cookieString.split(";").reduce((acc, cookie) => {
+    const [key, value] = cookie.trim().split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
 
-    const projectRef = localStorage.getItem('supabaseProjectRef');
-    if (!projectRef) {
-      return null;
-    }
-    const sessionCookieName = `sb-${projectRef}-auth-token`;
-    return cookies[sessionCookieName];
+  const projectRef = localStorage.getItem("supabaseProjectRef");
+  if (!projectRef) {
+    return null;
+  }
+  const sessionCookieName = `sb-${projectRef}-auth-token`;
+  return cookies[sessionCookieName];
 }
 
 export const authService = {
@@ -28,6 +29,7 @@ export const authService = {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password }),
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -43,16 +45,17 @@ export const authService = {
   },
 
   async signIn(email, password) {
-    if (config.DEBUG) {
+    if (config.DEBUG)
       console.log("[authService] signIn called with:", email, password);
-    }
+
     const response = await fetch(`${config.NETLIFY_FUNC_URL}/signin`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
       },
       body: JSON.stringify({ email, password }),
-      credentials: "include" // ✅ Ensures cookies are stored!
+      credentials: "include", // ✅ Ensures cookies are sent & received
     });
 
     if (!response.ok) {
@@ -61,25 +64,26 @@ export const authService = {
     }
 
     const result = await response.json();
-    if (config.DEBUG) {
-      console.log("[authService] signIn result:", result);
-    }
-    // Store the projectRef in local storage
-    localStorage.setItem('supabaseProjectRef', result.projectRef);
+    if (config.DEBUG) console.log("[authService] signIn result:", result);
+
+    // Store the projectRef and accessToken in local storage
+    localStorage.setItem("supabaseProjectRef", result.projectRef);
+    localStorage.setItem("accessToken", result.accessToken);
+
     return result;
   },
 
   async signOut() {
-    if (config.DEBUG) {
-      console.log("[authService] signOut called");
-    }
-     // Clear projectRef on sign out
-    localStorage.removeItem('supabaseProjectRef');
+    if (config.DEBUG) console.log("[authService] signOut called");
+
+    // Clear projectRef on sign out
+    localStorage.removeItem("supabaseProjectRef");
     const response = await fetch(`${config.NETLIFY_FUNC_URL}/signout`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -98,22 +102,32 @@ export const authService = {
     if (config.DEBUG) {
       console.log("[authService] getSession called");
     }
-    const token = getTokenFromCookie();
-    if (!token) {
-      if (config.DEBUG) {
-        console.log("[authService] No token found");
-      }
-      throw new Error("No session token found"); // Consistent with original error
+
+    // Try to get the token from local storage first
+    let authToken = localStorage.getItem("accessToken");
+
+    // If not found in local storage, try to get it from cookies
+    if (!authToken) {
+      authToken = getTokenFromCookie();
     }
+
+    if (!authToken) {
+      throw new Error("No session token found");
+    }
+
     const response = await fetch(`${config.NETLIFY_FUNC_URL}/session`, {
       headers: {
         "Content-Type": "application/json",
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${authToken}`,
       },
+      credentials: "include",
     });
 
     if (!response.ok) {
       const error = await response.json();
+      if (response.status === 401) {
+        throw new Error("Invalid session token"); // Specific error for 401
+      }
       throw new Error(error.error || "Failed to get session");
     }
 
