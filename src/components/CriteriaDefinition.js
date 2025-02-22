@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { authService } from '../services/auth';
-import { aiService } from '../services/ai';
-import { config } from '../config';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { authService } from "../services/auth";
+import { aiService } from "../services/ai";
+import { config } from "../config";
 
 function CriteriaDefinition() {
   const { id } = useParams();
@@ -16,21 +16,28 @@ function CriteriaDefinition() {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const accessToken = localStorage.getItem('accessToken');
-        const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+        const accessToken = localStorage.getItem("accessToken");
+        const response = await fetch(
+          `${config.NETLIFY_FUNC_URL}/projects/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to fetch project');
+          throw new Error("Failed to fetch project");
         }
 
         const data = await response.json();
         setProject(data);
-        setCriteriaList(data.criteria && data.criteria.length > 0 ? data.criteria : [{ id: crypto.randomUUID(), definition: '', weight: 1 }]);
+        setCriteriaList(
+          data.criteria && data.criteria.length > 0
+            ? data.criteria
+            : [{ id: crypto.randomUUID(), definition: "", weight: 1 }]
+        );
       } catch (error) {
         setError(error.message);
       }
@@ -40,29 +47,34 @@ function CriteriaDefinition() {
   }, [id]);
 
   const addCriteria = () => {
-    setCriteriaList([...criteriaList, { id: crypto.randomUUID(), definition: '', weight: 1 }]);
+    setCriteriaList([
+      ...criteriaList,
+      { id: crypto.randomUUID(), definition: "", weight: 1 },
+    ]);
   };
 
   const updateCriteria = (id, field, value) => {
-    setCriteriaList(criteriaList.map(criteria => 
-      criteria.id === id ? { ...criteria, [field]: value } : criteria
-    ));
+    setCriteriaList(
+      criteriaList.map((criteria) =>
+        criteria.id === id ? { ...criteria, [field]: value } : criteria
+      )
+    );
   };
 
   const removeCriteria = (id) => {
-    setCriteriaList(criteriaList.filter(criteria => criteria.id !== id));
+    setCriteriaList(criteriaList.filter((criteria) => criteria.id !== id));
   };
 
   const generateCriteria = async () => {
     if (!project?.name) return;
-    
+
     setIsGenerating(true);
     try {
       const suggestions = await aiService.generateCriteria(project.name);
-      const newCriteria = suggestions.map(criteria => ({
+      const newCriteria = suggestions.map((criteria) => ({
         id: crypto.randomUUID(),
         definition: criteria.definition,
-        weight: criteria.weight || 1
+        weight: criteria.weight || 1,
       }));
       setCriteriaList(newCriteria);
     } catch (error) {
@@ -76,22 +88,25 @@ function CriteriaDefinition() {
     e.preventDefault();
     setLoading(true);
     try {
-      const validCriteria = criteriaList.filter(c => c.definition.trim());
+      const validCriteria = criteriaList.filter((c) => c.definition.trim());
       if (validCriteria.length === 0) {
-        throw new Error('At least one criteria is required');
+        throw new Error("At least one criteria is required");
       }
-      const accessToken = localStorage.getItem('accessToken');
-      const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}/criteria`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(validCriteria)
-      });
+      const accessToken = localStorage.getItem("accessToken");
+      const response = await fetch(
+        `${config.NETLIFY_FUNC_URL}/projects/${id}/criteria`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(validCriteria),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to save criteria');
+        throw new Error("Failed to save criteria");
       }
 
       navigate(`/projects/${id}`);
@@ -113,7 +128,7 @@ function CriteriaDefinition() {
             disabled={isGenerating || !project.name}
             className="button button-secondary"
           >
-            {isGenerating ? 'Generating...' : 'Get AI Suggestions'}
+            {isGenerating ? "Generating..." : "Get AI Suggestions"}
           </button>
         )}
       </div>
@@ -123,12 +138,40 @@ function CriteriaDefinition() {
           <h3>Criteria</h3>
           {criteriaList.map((criteria) => (
             <div key={criteria.id}>
-              <input type="text" placeholder="Definition" value={criteria.definition} onChange={(e) => updateCriteria(criteria.id, 'definition', e.target.value)} />
-              <input type="number" min="1" max="10" value={criteria.weight} onChange={(e) => updateCriteria(criteria.id, 'weight', parseInt(e.target.value, 10))} />
-              <button type="button" onClick={() => removeCriteria(criteria.id)}>Remove</button>
+              <input
+                type="text"
+                placeholder="Definition"
+                value={criteria.definition}
+                onChange={(e) =>
+                  updateCriteria(criteria.id, "definition", e.target.value)
+                }
+              />
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={criteria.weight}
+                onChange={(e) =>
+                  updateCriteria(
+                    criteria.id,
+                    "weight",
+                    parseInt(e.target.value, 10)
+                  )
+                }
+              />
+              <button type="button" onClick={() => removeCriteria(criteria.id)}>
+                Remove
+              </button>
             </div>
           ))}
-          <button type="button" onClick={addCriteria}>Add</button>
+
+          <div key={"new_criteria"}>
+            <input type="text" placeholder="Definition" value="" />
+            <input type="number" min="1" max="10" />
+          </div>
+          <button type="button" onClick={addCriteria}>
+            Add Criteria
+          </button>
         </section>
         <button type="submit">Save Criteria</button>
       </form>

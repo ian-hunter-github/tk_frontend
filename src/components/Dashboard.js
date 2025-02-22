@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { aiService } from "../services/ai";
-import { config } from "../config";
+import { projectsService } from "../services/projectsService";
 
 function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null); // Track error state
+  const [error, setError] = useState(null);
   const [newProjectGoal, setNewProjectGoal] = useState("");
   const [newProjectNotes, setNewProjectNotes] = useState("");
   const [showNewProjectForm, setShowNewProjectForm] = useState(false);
@@ -16,27 +16,9 @@ function Dashboard() {
 
   const fetchProjects = async () => {
     setLoading(true);
-    setError(null); // Clear previous errors
+    setError(null);
     try {
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) {
-        setError("No access token found. Please sign in again.");
-        return;
-      }
-      const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.message || "Failed to fetch projects";
-        throw new Error(errorMessage);
-      }
-
-      const data = await response.json();
+      const data = await projectsService.getAll();
       setProjects(data || []);
     } catch (error) {
       setError(error.message);
@@ -122,37 +104,22 @@ function Dashboard() {
 
     setLoading(true);
     try {
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) {
-        throw new Error("No access token found");
-      }
-      const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: newProjectGoal,
-          description: newProjectNotes,
-          criteria: aiSuggestions
-            ? {
-                mustHave: aiSuggestions.mustHave.filter((c) =>
-                  acceptedCriteria.has(`must-${c.id}`)
-                ),
-                want: aiSuggestions.want.filter((c) =>
-                  acceptedCriteria.has(`want-${c.id}`)
-                ),
-              }
-            : null,
-        }),
-      });
+      const projectData = {
+        name: newProjectGoal,
+        description: newProjectNotes,
+        criteria: aiSuggestions
+          ? {
+              mustHave: aiSuggestions.mustHave.filter((c) =>
+                acceptedCriteria.has(`must-${c.id}`)
+              ),
+              want: aiSuggestions.want.filter((c) =>
+                acceptedCriteria.has(`want-${c.id}`)
+              ),
+            }
+          : null,
+      };
 
-      if (!response.ok) {
-        throw new Error("Failed to create project");
-      }
-
-      const data = await response.json();
+      const data = await projectsService.create(projectData);
       setProjects([...projects, data]);
       setNewProjectGoal("");
       setNewProjectNotes("");
