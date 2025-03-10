@@ -1,0 +1,40 @@
+.app-header {
+    background-color: #282c34;
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-container {
+  background-color: #f0f0f0; /* Light gray background */
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+  .title-container {
+    /* Add specific styles for title if needed */
+  }
+
+  /* Hamburger Styles */
+.hamburger-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex; /* Use flexbox to arrange the spans vertically */
+  flex-direction: column; /* Stack the spans vertically */
+  justify-content: space-between; /* Space out the spans */
+  width: 30px; /* Width of the button */
+  height: 20px;
+}
+
+.hamburger-icon {
+display: block;
+width: 30px;
+height: 3px;
+background-color: white;
+margin: 3px 0; /* Space out the lines */
+}

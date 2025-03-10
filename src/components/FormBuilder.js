@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { authService } from '../services/auth';
+import { authService } from '../services/authService';
 import { config } from '../config';
 
 const FIELD_TYPES = [

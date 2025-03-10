@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { authService } from "../services/auth";
+import { criteriaService } from '../services/criteriaService';
+import { authService } from '../services/authService';
 import { aiService } from "../services/ai";
 import { config } from "../config";
 
@@ -90,24 +91,11 @@ function CriteriaDefinition() {
     try {
       const validCriteria = criteriaList.filter((c) => c.definition.trim());
       if (validCriteria.length === 0) {
-        throw new Error("At least one criteria is required");
+        throw new Error("At least one criterion is required");
       }
-      const accessToken = localStorage.getItem("accessToken");
-      const response = await fetch(
-        `${config.NETLIFY_FUNC_URL}/projects/${id}/criteria`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(validCriteria),
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error("Failed to save criteria");
-      }
+      // Use criteriaService.create to handle the API call
+      await criteriaService.create(id, validCriteria);
 
       navigate(`/projects/${id}`);
     } catch (error) {

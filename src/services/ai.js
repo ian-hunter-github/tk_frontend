@@ -1,5 +1,5 @@
 import { config } from '../config';
-import { authService } from './auth';
+import { authService } from './authService';
 
 export const aiService = {
   async generateCriteria(concept) {
@@ -7,11 +7,10 @@ export const aiService = {
       if (config.DEBUG) {
         console.log("[aiService] generateCriteria called with:", concept);
       }
-      const { session } = await authService.getSession();
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/ai/generate-criteria`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ concept })
@@ -38,11 +37,10 @@ export const aiService = {
       if (config.DEBUG) {
         console.log("[aiService] evaluateAlternative called with:", alternative, criteria);
       }
-      const { session } = await authService.getSession();
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/ai/evaluate-alternative`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ alternative, criteria })
@@ -69,11 +67,10 @@ export const aiService = {
       if (config.DEBUG) {
         console.log("[aiService] predictScores called with:", alternative, newCriteria, existingCriteria);
       }
-      const { session } = await authService.getSession();
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/ai/predict-scores`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ alternative, newCriteria, existingCriteria })

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState } from 'react';
 import { woodPattern, metallicPattern } from './patterns';
 import '../styles/fonts.css';
 
-const ThemeContext = createContext();
+export const ThemeContext = createContext();
 
 export const themes = {
   mui: {
@@ -78,13 +78,13 @@ export const themes = {
   }
 };
 
-export function ThemeProvider({ children }) {
-  const [currentTheme, setCurrentTheme] = useState(themes.mui);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+export function ThemeProvider({ children, isThemeModalOpen, setThemeModalOpen }) {
+    const [currentTheme, setCurrentTheme] = useState(themes.mui);
+    const [isDarkMode, setIsDarkMode] = useState(false);
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+    const toggleDarkMode = () => {
+        setIsDarkMode(!isDarkMode);
+    };
 
   const changeTheme = (themeName) => {
     setCurrentTheme(themes[themeName]);
@@ -103,11 +103,11 @@ export function ThemeProvider({ children }) {
     }
   };
 
-  return (
-    <ThemeContext.Provider value={{ theme, changeTheme, isDarkMode, toggleDarkMode }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+    return (
+        <ThemeContext.Provider value={{ theme, changeTheme, isDarkMode, toggleDarkMode, isThemeModalOpen, setThemeModalOpen }}>
+            {children}
+        </ThemeContext.Provider>
+    );
 }
 
 export function useTheme() {

@@ -1,30 +1,39 @@
 import { config } from '../config';
-import { authService } from './auth';
+export function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
 
 export const projectsService = {
   async getAll() {
     try {
-      if (config.DEBUG) {
-        console.log("[projectsService] getAll called");
-      }
-      // Get the session and extract the access token
-      const { session } = await authService.getSession();
-      const accessToken = session.access_token || localStorage.getItem("accessToken");
-      
-      if (!accessToken) {
-        throw new Error('No access token found');
+      if (config.DEBUG) console.log("[projectsService] getAll called");
+
+      // Preflight request workaround
+      const preflightResponse = await fetch(`${config.NETLIFY_FUNC_URL}/projects`, {
+        method: 'OPTIONS',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!preflightResponse.ok) {
+        const error = await preflightResponse.json();
+        throw new Error(error.error || 'Failed to fetch projects (preflight)');
       }
 
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects`, {
+        credentials: 'include', // Include cookies in the request
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         }
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch projects');
+        throw new Error(error.error || "Failed to fetch projects");
       }
 
       const result = await response.json();
@@ -33,7 +42,7 @@ export const projectsService = {
       }
       return result;
     } catch (error) {
-      console.error('Get Projects Error:', error);
+      console.error("Get Projects Error:", error);
       throw error;
     }
   },
@@ -43,23 +52,24 @@ export const projectsService = {
       if (config.DEBUG) {
         console.log("[projectsService] getById called with:", id);
       }
-      const { session } = await authService.getSession();
-      const accessToken = session.access_token || localStorage.getItem("accessToken");
 
-      if (!accessToken) {
-        throw new Error('No access token found');
+      const token = getCookie("sb-auth-token");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
+        credentials: 'include',
+        headers: headers,
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch project');
+        throw new Error(error.error || "Failed to fetch project");
       }
 
       const result = await response.json();
@@ -68,35 +78,30 @@ export const projectsService = {
       }
       return result;
     } catch (error) {
-      console.error('Get Project Error:', error);
+      console.error("Get Project Error:", error);
       throw error;
     }
   },
 
   async create(projectData) {
     try {
+
       if (config.DEBUG) {
         console.log("[projectsService] create called with:", projectData);
       }
-      const { session } = await authService.getSession();
-      const accessToken = session.access_token || localStorage.getItem("accessToken");
-
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
 
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects`, {
-        method: 'POST',
+        method: "POST",
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(projectData)
+        body: JSON.stringify({title: projectData.name, description: projectData.description}),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to create project');
+        throw new Error(error.error || "Failed to create project");
       }
 
       const result = await response.json();
@@ -105,7 +110,7 @@ export const projectsService = {
       }
       return result;
     } catch (error) {
-      console.error('Create Project Error:', error);
+      console.error("Create Project Error:", error);
       throw error;
     }
   },
@@ -115,25 +120,18 @@ export const projectsService = {
       if (config.DEBUG) {
         console.log("[projectsService] update called with:", id, projectData);
       }
-      const { session } = await authService.getSession();
-      const accessToken = session.access_token || localStorage.getItem("accessToken");
-
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
-
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}`, {
-        method: 'PUT',
+        method: "PUT",
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(projectData)
+        body: JSON.stringify(projectData),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to update project');
+        throw new Error(error.error || "Failed to update project");
       }
 
       const result = await response.json();
@@ -142,7 +140,7 @@ export const projectsService = {
       }
       return result;
     } catch (error) {
-      console.error('Update Project Error:', error);
+      console.error("Update Project Error:", error);
       throw error;
     }
   },
@@ -152,24 +150,17 @@ export const projectsService = {
       if (config.DEBUG) {
         console.log("[projectsService] delete called with:", id);
       }
-      const { session } = await authService.getSession();
-      const accessToken = session.access_token || localStorage.getItem("accessToken");
-
-      if (!accessToken) {
-        throw new Error('No access token found');
-      }
-
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}`, {
-        method: 'DELETE',
+        credentials: 'include',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to delete project');
+        throw new Error(error.error || "Failed to delete project");
       }
 
       const result = await response.json();
@@ -178,8 +169,8 @@ export const projectsService = {
       }
       return result;
     } catch (error) {
-      console.error('Delete Project Error:', error);
+      console.error("Delete Project Error:", error);
       throw error;
     }
-  }
+  },
 };

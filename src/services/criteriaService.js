@@ -1,5 +1,5 @@
 import { config } from '../config';
-import { authService } from './auth';
+import { authService } from './authService';
 
 export const criteriaService = {
   async getAll(projectId) {
@@ -7,10 +7,10 @@ export const criteriaService = {
       if (config.DEBUG) {
         console.log("[criteriaService] getAll called with projectId:", projectId);
       }
-      const { session } = await authService.getSession();
+
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/criteria?projectId=${projectId}`, {
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -36,11 +36,11 @@ export const criteriaService = {
       if (config.DEBUG) {
         console.log("[criteriaService] create called with:", projectId, criteriaList);
       }
-      const { session } = await authService.getSession();
+
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/criteria`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -70,11 +70,10 @@ export const criteriaService = {
       if (config.DEBUG) {
         console.log("[criteriaService] update called with:", id, criterionData);
       }
-      const { session } = await authService.getSession();
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/criteria/${id}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(criterionData)
@@ -101,11 +100,11 @@ export const criteriaService = {
       if (config.DEBUG) {
         console.log("[criteriaService] delete called with:", id);
       }
-      const { session } = await authService.getSession();
+
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/criteria/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json'
         }
       });

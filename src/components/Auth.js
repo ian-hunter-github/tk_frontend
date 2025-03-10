@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/auth';
+import { authService } from '../services/authService';
 
 function Auth({ onSignIn }) {
     const [email, setEmail] = useState('ian@tests.com');
@@ -24,16 +24,18 @@ function Auth({ onSignIn }) {
 
     const handleLocalSignIn = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    try {
-      await authService.signIn(email, password);
-      onSignIn(); // Call the onSignIn callback from props
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setLoading(true);
+        try {
+            await authService.signIn(email, password);
+            onSignIn(email, password); // Pass email and password
+        }
+        catch (error) {
+            alert(error.message);
+        }
+        finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div>
