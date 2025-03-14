@@ -1,5 +1,4 @@
 import { config } from '../config';
-import { authService } from './authService';
 
 export const choicesService = {
   async getAll(projectId) {

@@ -10,25 +10,18 @@ export const projectsService = {
     try {
       if (config.DEBUG) console.log("[projectsService] getAll called");
 
-      // Preflight request workaround
-      const preflightResponse = await fetch(`${config.NETLIFY_FUNC_URL}/projects`, {
-        method: 'OPTIONS',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      const token = getCookie("sb-auth-token");
+      const headers = {
+        "Content-Type": "application/json",
+      };
 
-      if (!preflightResponse.ok) {
-        const error = await preflightResponse.json();
-        throw new Error(error.error || 'Failed to fetch projects (preflight)');
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects`, {
-        credentials: 'include', // Include cookies in the request
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        credentials: 'include',
+        headers: headers,
       });
 
       if (!response.ok) {
@@ -90,13 +83,20 @@ export const projectsService = {
         console.log("[projectsService] create called with:", projectData);
       }
 
+      const token = getCookie("sb-auth-token");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects`, {
         method: "POST",
         credentials: 'include',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({title: projectData.name, description: projectData.description}),
+        headers: headers,
+        body: JSON.stringify({title: projectData.title, description: projectData.description}),
       });
 
       if (!response.ok) {
@@ -120,12 +120,20 @@ export const projectsService = {
       if (config.DEBUG) {
         console.log("[projectsService] update called with:", id, projectData);
       }
+
+      const token = getCookie("sb-auth-token");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}`, {
         method: "PUT",
         credentials: 'include',
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: headers,
         body: JSON.stringify(projectData),
       });
 
@@ -150,12 +158,19 @@ export const projectsService = {
       if (config.DEBUG) {
         console.log("[projectsService] delete called with:", id);
       }
+      const token = getCookie("sb-auth-token");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}`, {
         credentials: 'include',
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: headers,
       });
 
       if (!response.ok) {

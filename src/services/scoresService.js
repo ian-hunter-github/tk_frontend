@@ -1,5 +1,4 @@
 import { config } from '../config';
-import { authService } from './authService';
 import { getCookie } from './projectsService';
 
 export const scoresService = {

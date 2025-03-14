@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { criteriaService } from '../services/criteriaService';
-import { authService } from '../services/authService';
 import { aiService } from "../services/ai";
 import { config } from "../config";
 
 function CriteriaDefinition() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [project, setProject] = useState(null);
   const [criteriaList, setCriteriaList] = useState([]);
@@ -87,7 +85,6 @@ function CriteriaDefinition() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     try {
       const validCriteria = criteriaList.filter((c) => c.definition.trim());
       if (validCriteria.length === 0) {
@@ -100,12 +97,10 @@ function CriteriaDefinition() {
       navigate(`/projects/${id}`);
     } catch (error) {
       setError(error.message);
-    } finally {
-      setLoading(false);
     }
   };
 
-  return (
+    return (
     <div className="criteria-form">
       <div className="criteria-header">
         <h2>Define Decision Criteria</h2>

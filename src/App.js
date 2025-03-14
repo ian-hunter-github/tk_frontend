@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import "./App.css";
 import Dashboard from "./components/Dashboard";
 import ProjectView from "./components/ProjectView";
@@ -9,7 +9,6 @@ import AlternativeEvaluation from "./components/AlternativeEvaluation";
 import { ThemeProvider, useTheme } from "./themes/ThemeContext";
 import { AuthProvider, useAuth } from "./AuthContext"; // Import AuthProvider and useAuth
 import Auth from "./components/Auth";
-import AppMenu from "./components/AppMenu";
 import ThemeDialog from "./components/ThemeDialog"; // Import ThemeDialog
 import Header from "./components/Header";
 
@@ -72,43 +71,47 @@ function ThemedApp({ children }) {
 }
 
 function App() {
-    const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-    const { session, handleSignIn, handleSignOut } = useAuth();
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+  const { session, handleSignIn } = useAuth();
 
-    const openThemeModal = () => {
-        setIsThemeModalOpen(true);
-    };
+  const closeThemeModal = () => {
+    setIsThemeModalOpen(false);
+  };
 
-    const closeThemeModal = () => {
-        setIsThemeModalOpen(false);
-    };
-
-    return (
-        <ThemeProvider isThemeModalOpen={isThemeModalOpen} setThemeModalOpen={setIsThemeModalOpen}>
-            <ThemedApp>
-                <div className="App">
-                    <Header />
-                    <Routes>
-                        <Route
-                            path="/"
-                            element={
-                                session ? <Dashboard /> : <Auth onSignIn={handleSignIn} />
-                            }
-                        />
-                        <Route path="/projects/:id" element={<ProjectView />} />
-                        <Route path="/projects/:id/criteria" element={<CriteriaDefinition />} />
-                        <Route path="/projects/:id/form" element={<FormBuilder />} />
-                        <Route path="/projects/:id/evaluate" element={<AlternativeEvaluation />} />
-                    </Routes>
-                    <ThemeDialog isOpen={isThemeModalOpen} onClose={closeThemeModal} />
-                </div>
-            </ThemedApp>
-        </ThemeProvider>
-    );
+  return (
+    <ThemeProvider isThemeModalOpen={isThemeModalOpen} setThemeModalOpen={setIsThemeModalOpen}>
+      <ThemedApp>
+        <div className="App">
+          <Header />
+          <Routes>
+            <Route
+              path="/"
+              element={
+                session ? <Dashboard /> : <Auth onSignIn={handleSignIn} />
+              }
+            />
+            <Route path="/projects/:id" element={<ProjectView />} />
+            <Route
+              path="/projects/:id/criteria"
+              element={<CriteriaDefinition />}
+            />
+            <Route path="/projects/:id/form" element={<FormBuilder />} />
+            <Route
+              path="/projects/:id/evaluate"
+              element={<AlternativeEvaluation />}
+            />
+          </Routes>
+          <ThemeDialog isOpen={isThemeModalOpen} onClose={closeThemeModal} />
+        </div>
+      </ThemedApp>
+    </ThemeProvider>
+  );
 }
 
-export default () => (
+const WrappedApp = () => (
   <AuthProvider>
     <App />
   </AuthProvider>
 );
+
+export default WrappedApp;

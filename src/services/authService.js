@@ -63,8 +63,6 @@ export const authService = {
       console.log("[authService] signIn result:", result);
     }
 
-    setCookie("sb-auth-token", result.user.access_token, 1);
-
     return result;
   },
 

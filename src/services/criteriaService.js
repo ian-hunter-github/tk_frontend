@@ -1,5 +1,4 @@
 import { config } from '../config';
-import { authService } from './authService';
 
 export const criteriaService = {
   async getAll(projectId) {

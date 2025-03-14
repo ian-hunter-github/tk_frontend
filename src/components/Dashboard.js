@@ -1,60 +1,66 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { aiService } from "../services/ai";
-import { projectsService } from "../services/projectsService";
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { aiService } from '../services/ai';
+import { projectsService } from '../services/projectsService';
+import { useAuth } from '../AuthContext';
 
 function Dashboard() {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [newProjectGoal, setNewProjectGoal] = useState("");
-  const [newProjectNotes, setNewProjectNotes] = useState("");
-  const [showNewProjectForm, setShowNewProjectForm] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [acceptedCriteria, setAcceptedCriteria] = useState(new Set());
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [newProjectGoal, setNewProjectGoal] = useState('');
+    const [newProjectNotes, setNewProjectNotes] = useState('');
+    const [showNewProjectForm, setShowNewProjectForm] = useState(false);
+    const [aiSuggestions, setAiSuggestions] = useState(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [acceptedCriteria, setAcceptedCriteria] = useState(new Set());
 
-  const fetchProjects = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await projectsService.getAll();
-      setProjects(data || []);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const { session } = useAuth();
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+    const fetchProjects = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await projectsService.getAll();
+            setProjects(data || []);
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  const generateSuggestions = async () => {
-    if (!newProjectGoal.trim()) {
-      alert("Please enter a project goal");
-      return;
-    }
+    useEffect(() => {
+        // Fetch projects only if the user is authenticated (session is not null)
+        if (session) {
+            fetchProjects();
+        }
+    }, [session]); // Add session as a dependency
 
-    setIsGenerating(true);
-    try {
-      const suggestions = await aiService.generateCriteria(newProjectGoal);
-      suggestions.mustHave = suggestions.mustHave.map((c) => ({
-        ...c,
-        id: Date.now() + Math.random(),
-      }));
-      suggestions.want = suggestions.want.map((c) => ({
-        ...c,
-        id: Date.now() + Math.random(),
-      }));
-      setAiSuggestions(suggestions);
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+    const generateSuggestions = async () => {
+        if (!newProjectGoal.trim()) {
+            alert('Please enter a project goal');
+            return;
+        }
+
+        setIsGenerating(true);
+        try {
+            const suggestions = await aiService.generateCriteria(newProjectGoal);
+            suggestions.mustHave = suggestions.mustHave.map((c) => ({
+                ...c,
+                id: Date.now() + Math.random(),
+            }));
+            suggestions.want = suggestions.want.map((c) => ({
+                ...c,
+                id: Date.now() + Math.random(),
+            }));
+            setAiSuggestions(suggestions);
+        } catch (error) {
+            alert(error.message);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
   const handleAcceptCriterion = (type, id) => {
     setAcceptedCriteria((prev) => new Set([...prev, `${type}-${id}`]));
