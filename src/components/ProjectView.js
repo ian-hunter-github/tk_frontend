@@ -109,7 +109,8 @@ function ProjectView() {
 
     const handleSaveCriteriaEdit = async () => {
         try {
-            await criteriaService.update(editingCriteriaId, editingCriteria);
+            const { scores, ...criteriaDataWithoutScores } = editingCriteria;
+            await criteriaService.update(editingCriteriaId, criteriaDataWithoutScores);
             fetchProject();
             setEditingCriteriaId(null);
             setEditingCriteria({});
