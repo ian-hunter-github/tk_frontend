@@ -168,8 +168,9 @@ export const projectsService = {
       }
 
       const response = await fetch(`${config.NETLIFY_FUNC_URL}/projects/${id}`, {
-        credentials: 'include',
         method: "DELETE",
+        mode: 'cors',
+        credentials: 'include',
         headers: headers,
       });
 
